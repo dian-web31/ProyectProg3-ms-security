@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class NotificationService {
 
-    @Value("${notification.service.url}")
+    @Value("${apis.ms-notification-url}")
     private String notificationServiceUrl; // URL del microservicio de notificaciones
 
     //Metodo para Saludar a los nuevos usuarios
