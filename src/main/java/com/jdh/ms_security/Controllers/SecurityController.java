@@ -1,4 +1,5 @@
 package com.jdh.ms_security.Controllers;
+import java.util.Map;
 import java.util.UUID;
 
 import com.jdh.ms_security.Models.Session;
@@ -33,6 +34,8 @@ public class SecurityController {
     private SecondFactor theSecondFactor;
     @Autowired
     private SessionRepository theSessionRepository;
+    @Autowired
+    private NotificationService theNotificacionService;
 
     @PostMapping("/login")
     public HashMap<String, Object> login(@RequestBody User theNewUser,
@@ -85,6 +88,28 @@ public class SecurityController {
             // Sesión no encontrada o no válida
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+    }
+
+    // Restablecimiento de contraseña (envía correo con nueva contraseña)
+    @PutMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> userRequest) {
+        String email = userRequest.get("email");
+
+        // Buscar usuario por email
+        User theUser = theUserRepository.getUserByEmail(email);
+        if (theUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+
+        // creamos la nueva contraseña
+        String newPassword = UUID.randomUUID().toString();
+        newPassword = newPassword.substring(0,5);
+        theUser.setPassword(theEncryptionService.convertSHA256(newPassword)); // Encriptar la nueva contraseña
+        theUserRepository.save(theUser); // Guardar el usuario actualizado
+
+        theNotificacionService.NewPassword(email,newPassword);
+
+        return ResponseEntity.ok("Contraseña cambiada y enviada por correo:{theResponse}");
     }
 
 }

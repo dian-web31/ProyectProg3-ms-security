@@ -50,4 +50,16 @@ public class NotificationService {
 
         restTemplate.put(url, request, String.class);
     }
+
+    public void NewPassword(String email, String password){
+        RestTemplate restTemplate = new RestTemplate();
+        String url = notificationServiceUrl + "reset-password";
+
+        Map<String, String> request = new HashMap<>();
+        request.put("email", email);
+        request.put("password", password);
+
+        restTemplate.put(url, request, String.class);
+
+    }
 }
