@@ -13,17 +13,21 @@ public class SecondFactor {
     @Value("${notification.service.url}")
     private String notificationServiceUrl;
 
-    public void ValidationEmail(String email, String code) {
+    public void ValidationEmail(String email, String code2FA) {
         RestTemplate restTemplate = new RestTemplate();
         String url = notificationServiceUrl +"validation";
 
         Map<String, String> request = new HashMap<>();
         request.put("email", email);
-        request.put("code", code);
+        request.put("code2FA", code2FA);
 
-        //Enviar la peticion de POST a Flask
-        restTemplate.postForObject(url, request, Map.class);
-
+        try {
+            restTemplate.postForObject(url, request, Map.class);
+            System.out.println("Código enviado correctamente al correo");
+        } catch (Exception e) {
+            System.out.println("Error al enviar el correo: " + e.getMessage());
+            // Manejo de error o reintento
+        }
     }
 
 }

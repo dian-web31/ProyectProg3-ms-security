@@ -28,16 +28,19 @@ public class SessionController {
         Session theSession=this.theSessionRepository.findById(id).orElse(null);
         return theSession;
     }
+
     @PostMapping
     public Session create(@RequestBody Session newSession){
         return this.theSessionRepository.save(newSession);
     }
+
     @PutMapping("{id}")
     public Session update(@PathVariable String id, @RequestBody Session newSession){
         Session actualSession=this.theSessionRepository.findById(id).orElse(null);
         if(actualSession!=null){
             actualSession.setToken(newSession.getToken());
             actualSession.setExpiration(newSession.getExpiration());
+            actualSession.setcode2FA(newSession.getcode2FA());
             this.theSessionRepository.save(actualSession);
             return actualSession;
         }else{

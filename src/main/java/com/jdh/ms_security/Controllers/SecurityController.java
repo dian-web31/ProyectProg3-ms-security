@@ -1,6 +1,9 @@
 package com.jdh.ms_security.Controllers;
 import java.util.UUID;
+
+import com.jdh.ms_security.Models.Session;
 import com.jdh.ms_security.Models.User;
+import com.jdh.ms_security.Repositories.SessionRepository;
 import com.jdh.ms_security.Repositories.UserRepository;
 import com.jdh.ms_security.Services.EncryptionService;
 import com.jdh.ms_security.Services.NotificationService;
@@ -8,6 +11,8 @@ import com.jdh.ms_security.Services.SecondFactor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.jdh.ms_security.Services.JwtService;
 
@@ -26,6 +31,8 @@ public class SecurityController {
     private JwtService theJwtService;
     @Autowired
     private SecondFactor theSecondFactor;
+    @Autowired
+    private SessionRepository theSessionRepository;
 
     @PostMapping("/login")
     public HashMap<String, Object> login(@RequestBody User theNewUser,
@@ -33,8 +40,7 @@ public class SecurityController {
         HashMap<String, Object> theResponse = new HashMap<>();
         String token = "";
         User theActualUser = this.theUserRepository.getUserByEmail(theNewUser.getEmail());
-        if (theActualUser != null &&
-                theActualUser.getPassword().equals(theEncryptionService.convertSHA256(theNewUser.getPassword()))) {
+        if (theActualUser != null && theActualUser.getPassword().equals(theEncryptionService.convertSHA256(theNewUser.getPassword()))) {
             token = theJwtService.generateToken(theActualUser);
             theActualUser.setPassword("");
             theResponse.put("token", token);
@@ -47,30 +53,40 @@ public class SecurityController {
 
     }
 
-    @PostMapping("/second-validation")
-    public HashMap<String, Object> autentication(@RequestBody User theNewUser,
-                                                 final HttpServletResponse response) throws IOException {
+    @PostMapping("/second-validation/{userId}")
+    public ResponseEntity<HashMap<String, Object>> factorAuthentication(@RequestBody Session theSession, @PathVariable String userId) {
         HashMap<String, Object> theResponse = new HashMap<>();
-        //Crear un codigo random
-        String code = UUID.randomUUID().toString();
-        String token = "";
-        // Obtener el usuario actual desde la base de datos
-        User theActualUser = this.theUserRepository.getUserByEmail(theNewUser.getEmail());
-        token = theJwtService.generateToken(theActualUser);
 
-        // Evitar enviar la contraseña en la respuesta
-        theActualUser.setPassword("");
+        // Verifica si hay una sesión válida para el usuario y el token
+        Session validSession = theSessionRepository.getSessionByUserId(userId, theSession.getToken());
 
-        // Agregar el token, usuario y código generado a la respuesta
-        theResponse.put("token", token);
-        theResponse.put("user", theActualUser);
-        theResponse.put("code", code);
+        //Identificamos el usuario y traemos su email
+        User theUser=this.theUserRepository.findById(userId).orElse(null);
+        String email = theUser.getEmail();
 
-        // Llamar al servicio de segundo factor para validar el correo y enviar el código
-        theSecondFactor.ValidationEmail(theNewUser.getEmail(), code);
+        if (validSession != null && userId != null) {
+            //Crear un codigo random
+            String code2FA = UUID.randomUUID().toString();
 
-        return theResponse;
+            // Guarda el token en la sesión
+            validSession.setcode2FA(code2FA); // Guarda el 2FA
+            theSessionRepository.save(validSession); // Guarda la sesión actualizada
 
+            // Prepara la respuesta
+            theResponse.put("code2FA", code2FA); // 2FA que generaste
+            theResponse.put("email", email); // Usuario autenticado
+
+            // Llamar al servicio de segundo factor para validar el correo y enviar el código
+            theSecondFactor.ValidationEmail(email, code2FA);
+
+            return ResponseEntity.ok(theResponse);
+
+        } else {
+            // Sesión no encontrada o no válida
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
+
 }
+
 

@@ -20,7 +20,6 @@ public class WebConfig implements WebMvcConfigurer { //El WebConfig es un paquet
 
         //Si quiero crear un nuevo permiso, debo comentar esta linea
         //Estamos hablando de que este es un muro en el cual no permitiremos crear mas cosas, mas permisos para los roles
-//
 //        registry.addInterceptor(securityInterceptor)
 //                .addPathPatterns("/api/**")
 //                .excludePathPatterns("/api/public/**");

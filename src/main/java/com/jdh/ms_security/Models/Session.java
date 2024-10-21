@@ -12,11 +12,21 @@ public class Session {
     private String _id;
     private String token;
     private String expiration;
+    private String code2FA;
 
     @DBRef
     private User user;
 
-    public Session(String token, String expiration) {
+    public Session(){
+
+    }
+
+    public Session(String code2FA, User user) {
+        this.code2FA = code2FA;
+        this.user = user;
+    }
+
+    public Session(String token, String expiration, String code2FA) {
         this.token = token;
         this.expiration = expiration;
     }
@@ -51,5 +61,13 @@ public class Session {
 
     public void setExpiration(String expiration) {
         this.expiration = expiration;
+    }
+
+    public String getcode2FA() {
+        return code2FA;
+    }
+
+    public void setcode2FA(String code2FA) {
+        this.code2FA = code2FA;
     }
 }

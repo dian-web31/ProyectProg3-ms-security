@@ -16,7 +16,6 @@ import java.util.List;
 public class ValidatorsService {
     @Autowired
     private JwtService jwtService;
-
     @Autowired
     private PermissionRepository thePermissionRepository;
     @Autowired

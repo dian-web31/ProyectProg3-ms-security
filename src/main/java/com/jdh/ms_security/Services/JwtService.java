@@ -1,5 +1,6 @@
 package com.jdh.ms_security.Services;
 
+import com.jdh.ms_security.Models.Role;
 import com.jdh.ms_security.Models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
