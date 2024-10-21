@@ -10,7 +10,7 @@ import java.util.Map;
 @Service
 public class SecondFactor {
 
-    @Value("${notification.service.url}")
+    @Value("${apis.ms-notification-url}")
     private String notificationServiceUrl;
 
     public void ValidationEmail(String email, String code2FA) {
