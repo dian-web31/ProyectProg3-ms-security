@@ -27,7 +27,7 @@ public class ValidatorsService {
     private UserRoleRepository theUserRoleRepository;
 
     //En esta clase vendra la tarea mas larga
-    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String BEARER_PREFIX = "Bearer";
     public boolean validationRolePermission(HttpServletRequest request,
                                             String url,
                                             String method){

@@ -13,13 +13,22 @@ public class User {
     private String name;
     private String email;
     private String password;
+    private String code2fa;
 
     public User() {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.code2fa = code2fa;
     }
 
+    public String getcode2fa() {
+        return code2fa;
+    }
+
+    public void setcode2fa(String code2fa) {
+        this.code2fa = code2fa;
+    }
 
     public String get_id() {
         return _id;

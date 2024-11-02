@@ -35,12 +35,19 @@ public class UserController {
         return theUser;
     }
     @PostMapping("/create")
-    public ResponseEntity<User>  create(@RequestBody User newUser){
-        newUser.setPassword(this.theEncryptionService.convertSHA256(newUser.getPassword()));
-        //Creamos una variable en donde guardamos al nuevo usuario ingresado y comprobamos si le llega el correo
-        User userCreated = this.theuserRepository.save(newUser);
-        theNotificacionService.SendlWelcome(userCreated.getEmail(), userCreated.getName());
-        return new ResponseEntity<>(userCreated, HttpStatus.CREATED);
+    public ResponseEntity<?>  create(@RequestBody User newUser){
+        //vamos a asegurarnosde que este usuario no haya sido creado previamente
+        User verifiacion = this.theuserRepository.getUserByEmail(newUser.getEmail());
+        //En caso de que el usuario no exista lo creara
+        if (verifiacion == null) {
+            newUser.setPassword(this.theEncryptionService.convertSHA256(newUser.getPassword()));
+            //Creamos una variable en donde guardamos al nuevo usuario ingresado y comprobamos si le llega el correo
+            User userCreated = this.theuserRepository.save(newUser);
+            theNotificacionService.SendlWelcome(userCreated.getEmail(), userCreated.getName());
+            return new ResponseEntity<>(userCreated, HttpStatus.CREATED);
+        }else{
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Usuario ya existente en la aplicacion");
+        }
     }
     @PutMapping("{id}")
     public User update(@PathVariable String id, @RequestBody User newUser){
